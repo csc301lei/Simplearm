@@ -1,0 +1,19 @@
+#Way Points Tracker Params
+#Max HorizontalVel/YawRate is only for LocalControl Mode
+#Max Relative Horizontal Distance is only for GlobalControl Mode
+PoseTopic: '/vins_estimator/imu_propagate'
+VelocityControl: true
+LoopMode: false
+MaxHorizVel: 3.00
+MaxVertVel: 2.00
+MaxYawRate: 1.00
+MaxRelHorizDist: 2.00
+TolR: 0.10
+TolYaw: 0.01
+
+#Way Points
+WayPointsVec_x:         [0.00, 10.0, 0.00, 0.00, 0.00, -10., 0.00]
+WayPointsVec_y:         [0.00, 0.00, 0.00, 10.0, 0.00, 3.00, 0.00]
+WayPointsVec_z:         [10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0]
+WayPointsVec_yaw:       [0.00, 0.00, 2.00, -2.0, 0.00, 3.00, 0.00]
+WayPointsVec_duration:  [3.00, 5.00, 5.00, 3.00, 3.00, 3.00, 3.00]

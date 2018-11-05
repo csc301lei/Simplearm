@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+    
+    <include file="$(find dji_sdk)/launch/sdk.launch"/>
+    
+    <include file="$(find zed_wrapper)/launch/zed.launch"/>
+    
+    <include file="$(find vins_estimator)/launch/M100TX2ZED.launch"/>
+    
+    <node pkg="onboard_planner" type="onboard_planner_node" name="onboard_planner" output="screen">
+        <rosparam file="$(find onboard_planner)/config/onboard_planner_params.yaml" command="load" />
+    </node>
+</launch>
+

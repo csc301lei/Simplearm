@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+    <node pkg="onboard_planner" type="onboard_planner_node" name="onboard_planner" output="screen">
+    <!-- node parameters -->
+    <rosparam file="$(find onboard_planner)/config/onboard_planner_params.yaml" command="load" />
+    </node>
+</launch>
+
