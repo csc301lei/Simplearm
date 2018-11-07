@@ -66,6 +66,7 @@ int readch()
 //SimpleArm::SimpleArm(ros::NodeHandle n) : nh(n)
 SimpleArm::SimpleArm(ros::NodeHandle n)
 {
+	/*
 	char act;
 	cout << "choose action:" << endl;
 	cin >> act;
@@ -77,24 +78,33 @@ SimpleArm::SimpleArm(ros::NodeHandle n)
 								0, 0, 0);
 		cout << "reset done.\n";
 	}
-	//curPoseSub = nh.subscribe("/Robot_2/pose", 3, &SimpleArm::callbackCurPose, this);
-	//tarPoseSub = nh.subscribe("/Robot_3/pose", 3, &SimpleArm::callbackTarPose, this);
+	*/
+	//curPoseSub = nh.subscribe("/Robot_1/pose", 3, &SimpleArm::callbackCurPose, this);
+	//tarPoseSub = nh.subscribe("/Robot_2/pose", 3, &SimpleArm::callbackTarPose, this);
 }
 
 void SimpleArm::callbackCurPose(const geometry_msgs::PoseStamped::ConstPtr &msg)
 {
-	ArmPos curpos;
-	//curpos.x = msg->pose.position.y;
-	//curpos.y = -msg->pose.position.z;
+	curpos.x = msg->pose.position.y;
+	curpos.y = -msg->pose.position.z;
 	//curpos.z = msg->pose.position.z;
 }
 
 void SimpleArm::callbackTarPose(const geometry_msgs::PoseStamped::ConstPtr &msg)
 {
-	ArmPos tarpos;
-	//tarpos.x = msg->pose.position.y;
-	//tarpos.y = -msg->pose.position.z;
+	tarpos.x = msg->pose.position.y;
+	tarpos.y = -msg->pose.position.z;
 	//tarpos.z = msg->pose.position.z;
+	tarpos.x = tarpos.x - curpos.x;
+	tarpos.y = tarpos.y - curpos.y - 0.205;
+	cout << "tarpos.x [based on curpos] = " << tarpos.x << endl;
+	cout << "tarpos.y [based on curpos] = " << tarpos.y << endl;
+	double dist = sqrt(pow(tarpos.x, 2) + pow(tarpos.y, 2));
+	if (dist < 0.6 && tarpos.y > 0)
+	{
+		calcJointAngle(tarpos);
+	}
+	usleep(30000);
 }
 
 void SimpleArm::calcJointAngle(ArmPos &armpos)
@@ -155,9 +165,9 @@ void SimpleArm::calcJointAngle(ArmPos &armpos)
 			}
 		}
 	}
-	controlServo(theta_1, theta_2);
+	ServoPosControl(theta_1, theta_2);
 }
-void SimpleArm::controlServo(double theta_1, double theta_2)
+void SimpleArm::ServoPosControl(double theta_1, double theta_2)
 {
 	double outValue1, outValue2;
 	outValue1 = (theta_1 * 180 / PI) / 0.088;
@@ -168,6 +178,49 @@ void SimpleArm::controlServo(double theta_1, double theta_2)
 							outValue2, 0, 800,
 							0, 0, 0);
 }
+
+void SimpleArm::calcJointVel(ArmPos &armpos)
+{
+	double L1 = 0.37, L2 = 0.45;
+	//armpos.y = armpos.y - 0.21;
+	double theta_1, theta_2;
+	theta_1 = servo.ReadPos(1);
+	theta_2 = servo.ReadPos(2);
+	cout << "theta1_cur= " << theta_1 << endl;
+	cout << "theta2_cur= " << theta_2 << endl;
+	armpos.x = -armpos.x;
+	ArmPos terminal_pos;
+	ArmPos P_target_pos;
+	terminal_pos.x = L1 * cos(theta_1) + L2 * cos(theta_1 + theta_2);
+	terminal_pos.y = L1 * sin(theta_1) + L2 * sin(theta_1 + theta_2);
+	P_target_pos.x = armpos.x - terminal_pos.x;
+	P_target_pos.y = armpos.y - terminal_pos.y;
+	cout << "P_TARGET_POS.X= " << P_target_pos.x << endl;
+	cout << "P_TARGET_POS.Y= " << P_target_pos.y << endl;
+	double arm_x_vel, arm_y_vel;
+	arm_x_vel = P_armvel_x * P_target_pos.x;
+	arm_y_vel = P_armvel_y * P_target_pos.y;
+	double theta1_vel, theta2_vel;
+	theta1_vel = L2 * cos(theta_1 + theta_2) * arm_x_vel + L2 * sin(theta_1 + theta_2) * arm_y_vel;
+	theta1_vel = theta1_vel / (L1 * L2 * sin(theta_2));
+	theta2_vel = (-L1 * cos(theta_1) - L2 * cos(theta_1 + theta_2)) * arm_x_vel + (-L1 * sin(theta_1) - L2 * sin(theta_1 + theta_2)) * arm_y_vel;
+	theta2_vel = theta2_vel / (L1 * L2 * sin(theta_2));
+	cout << "theta1_vel" << theta1_vel << endl;
+	cout << "theta2_vel" << theta2_vel << endl;
+
+	//ServoVelControl(theta1_vel, theta2_vel);
+}
+void SimpleArm::ServoVelControl(double theta1_vel, double theta2_vel)
+{
+	double outValue1, outValue2;
+	outValue1 = (theta1_vel * 180 / PI) / 0.088;
+	cout << "servo1_vel:" << outValue1 << endl;
+	outValue2 = 2000 + (theta2_vel * 180 / PI) / 0.088;
+	cout << "servo2_vel:" << outValue2 << endl;
+	servo.WriteSpe(1, outValue1);
+	servo.WriteSpe(2, outValue2);
+}
+
 /*
 int main(int argc, char **argv)
 {
