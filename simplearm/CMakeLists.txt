@@ -12,14 +12,15 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   geometry_msgs
   std_msgs
+  serial
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
-set(CMAKE_BUILD_TYPE "Release ${CMAKE_BUILD_TYPE}")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -g -fPIC ${CMAKE_CXX_FLAGS_RELEASE}")
+#set(CMAKE_BUILD_TYPE "Release ${CMAKE_BUILD_TYPE}")
+#set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -g -fPIC ${CMAKE_CXX_FLAGS_RELEASE}")
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -110,7 +111,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -g -fPIC ${CMAKE_CXX_FLAGS_RELEASE}")
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES simplearm
-   CATKIN_DEPENDS roscpp rospy std_msgs
+   CATKIN_DEPENDS roscpp rospy std_msgs serial
    DEPENDS system_lib
 )
 

@@ -1,33 +1,40 @@
 /*
  * SCServo.h
- * Ó²¼þÍ¨ÐÅ½Ó¿Ú
- * ÈÕÆÚ: 2016.8.25
- * ×÷Õß: Ì·ÐÛÀÖ
+ * Ó²ï¿½ï¿½Í¨ï¿½Å½Ó¿ï¿½
+ * ï¿½ï¿½ï¿½ï¿½: 2016.8.25
+ * ï¿½ï¿½ï¿½ï¿½: Ì·ï¿½ï¿½ï¿½ï¿½
  */
 
 #ifndef _SCSERVO_H
 #define _SCSERVO_H
 
-#include "Serial.h"
-#include "SCSProtocol.h"
+#include <pthread.h>
+#include <ros/ros.h>
+#include <sched.h>
+#include <serial/serial.h>
+#include <std_msgs/Empty.h>
+#include <std_msgs/String.h>
+#include <stdio.h>
 #include "SCSProtocol.cpp"
-
+#include "SCSProtocol.h"
+//#include "Serial.h"
 
 const int Angle2pos1(double angle);
 const int Angle2pos2(double angle);
 const int Angle2pos3(double angle);
 
+using namespace serial;
 
-class SCServo : public SCSProtocol
-{
-public:
-	SCServo(void);
-	virtual int writeSCS(unsigned char *nDat, int nLen);//Êä³önLen×Ö½Ú
-	virtual int readSCS(unsigned char *nDat, int nLen);//ÊäÈënLen×Ö½Ú
-	virtual int writeSCS(unsigned char bDat);//Êä³ö1×Ö½Ú
-	virtual void flushSCS();//Ë¢ÐÂ½Ó¿Ú»º³åÇø
-public:
-	Serial serial;
+class SCServo : public SCSProtocol {
+ public:
+  SCServo(void);
+  virtual int writeSCS(unsigned char *nDat, int nLen);  //ï¿½ï¿½ï¿½nLenï¿½Ö½ï¿½
+  virtual int readSCS(unsigned char *nDat, int nLen);  //ï¿½ï¿½ï¿½ï¿½nLenï¿½Ö½ï¿½
+  virtual int writeSCS(unsigned char bDat);            //ï¿½ï¿½ï¿½1ï¿½Ö½ï¿½
+  virtual void flushSCS();  //Ë¢ï¿½Â½Ó¿Ú»ï¿½ï¿½ï¿½ï¿½ï¿½
+ public:
+  // Serial serial;
+  Serial ser;
 };
 
 #endif

@@ -1,44 +1,51 @@
 /*
  * SCSProtocol.cpp
- * SCS´®ÐÐ¶æ»úÐ­Òé³ÌÐò
- * ÈÕÆÚ: 2016.8.25
- * ×÷Õß: Ì·ÐÛÀÖ
+ * SCSï¿½ï¿½ï¿½Ð¶ï¿½ï¿½Ð­ï¿½ï¿½ï¿½ï¿½ï¿½
+ * ï¿½ï¿½ï¿½ï¿½: 2016.8.25
+ * ï¿½ï¿½ï¿½ï¿½: Ì·ï¿½ï¿½ï¿½ï¿½
  */
 
 #include <stddef.h>
+#include <stdio.h>
 #include "SCSProtocol.h"
 
 SCSProtocol::SCSProtocol()
 {
-	Level = 1;//³ý¹ã²¥Ö¸ÁîËùÓÐÖ¸Áî·µ»ØÓ¦´ð
-	End = 0;//¶æ»ú´¦ÀíÆ÷Óë¿ØÖÆ°å´¦ÀíÆ÷¶Ë½á¹¹²»Ò»ÖÂ
+	Level = 1; //ï¿½ï¿½ï¿½ã²¥Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î·µï¿½ï¿½Ó¦ï¿½ï¿½
+	End = 0;   //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ°å´¦ï¿½ï¿½ï¿½ï¿½ï¿½Ë½á¹¹ï¿½ï¿½Ò»ï¿½ï¿½
 }
 
-//1¸ö16Î»Êý²ð·ÖÎª2¸ö8Î»Êý
-//DataLÎªµÍÎ»£¬DataHÎª¸ßÎ»
-void SCSProtocol::Host2SCS(u8 *DataL, u8* DataH, int Data)
+//1ï¿½ï¿½16Î»ï¿½ï¿½ï¿½ï¿½ï¿½Îª2ï¿½ï¿½8Î»ï¿½ï¿½
+//DataLÎªï¿½ï¿½Î»ï¿½ï¿½DataHÎªï¿½ï¿½Î»
+void SCSProtocol::Host2SCS(u8 *DataL, u8 *DataH, int Data)
 {
-	if(End){
-		*DataL = (Data>>8);
-		*DataH = (Data&0xff);
-	}else{
-		*DataH = (Data>>8);
-		*DataL = (Data&0xff);
+	if (End)
+	{
+		*DataL = (Data >> 8);
+		*DataH = (Data & 0xff);
+	}
+	else
+	{
+		*DataH = (Data >> 8);
+		*DataL = (Data & 0xff);
 	}
 }
 
-//2¸ö8Î»Êý×éºÏÎª1¸ö16Î»Êý
-//DataLÎªµÍÎ»£¬DataHÎª¸ßÎ»
+//2ï¿½ï¿½8Î»ï¿½ï¿½ï¿½ï¿½ï¿½Îª1ï¿½ï¿½16Î»ï¿½ï¿½
+//DataLÎªï¿½ï¿½Î»ï¿½ï¿½DataHÎªï¿½ï¿½Î»
 int SCSProtocol::SCS2Host(u8 DataL, u8 DataH)
 {
 	int Data;
-	if(End){
+	if (End)
+	{
 		Data = DataL;
-		Data<<=8;
+		Data <<= 8;
 		Data |= DataH;
-	}else{
+	}
+	else
+	{
 		Data = DataH;
-		Data<<=8;
+		Data <<= 8;
 		Data |= DataL;
 	}
 	return Data;
@@ -53,29 +60,36 @@ void SCSProtocol::writeBuf(u8 ID, u8 MemAddr, u8 *nDat, u8 nLen, u8 Fun)
 	bBuf[1] = 0xff;
 	bBuf[2] = ID;
 	bBuf[4] = Fun;
-	if(nDat){
+	if (nDat)
+	{
 		msgLen += nLen + 1;
 		bBuf[3] = msgLen;
 		bBuf[5] = MemAddr;
 		writeSCS(bBuf, 6);
-		
-	}else{
+	}
+	else
+	{
 		bBuf[3] = msgLen;
 		writeSCS(bBuf, 5);
 	}
 	CheckSum = ID + msgLen + Fun + MemAddr;
 	u8 i = 0;
-	if(nDat){
-		for(i=0; i<nLen; i++){
+	if (nDat)
+	{
+		for (i = 0; i < nLen; i++)
+		{
 			CheckSum += nDat[i];
 		}
+		writeSCS(nDat, nLen);
 	}
-	writeSCS(nDat, nLen);
-	writeSCS(~CheckSum);
+	CheckSum = ~CheckSum;
+	writeSCS(&CheckSum, 1);
+	//writeSCS(nDat, nLen);
+	//writeSCS(~CheckSum);
 }
 
-//ÆÕÍ¨Ð´Ö¸Áî
-//¶æ»úID£¬MemAddrÄÚ´æ±íµØÖ·£¬Ð´ÈëÊý¾Ý£¬Ð´Èë³¤¶È
+//ï¿½ï¿½Í¨Ð´Ö¸ï¿½ï¿½
+//ï¿½ï¿½ï¿½IDï¿½ï¿½MemAddrï¿½Ú´ï¿½ï¿½ï¿½Ö·ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½Ð´ï¿½ë³¤ï¿½ï¿½
 int SCSProtocol::genWrite(u8 ID, u8 MemAddr, u8 *nDat, u8 nLen)
 {
 	flushSCS();
@@ -83,8 +97,8 @@ int SCSProtocol::genWrite(u8 ID, u8 MemAddr, u8 *nDat, u8 nLen)
 	return Ack(ID);
 }
 
-//Òì²½Ð´Ö¸Áî
-//¶æ»úID£¬MemAddrÄÚ´æ±íµØÖ·£¬Ð´ÈëÊý¾Ý£¬Ð´Èë³¤¶È
+//ï¿½ì²½Ð´Ö¸ï¿½ï¿½
+//ï¿½ï¿½ï¿½IDï¿½ï¿½MemAddrï¿½Ú´ï¿½ï¿½ï¿½Ö·ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½Ð´ï¿½ë³¤ï¿½ï¿½
 int SCSProtocol::regWrite(u8 ID, u8 MemAddr, u8 *nDat, u8 nLen)
 {
 	flushSCS();
@@ -92,11 +106,11 @@ int SCSProtocol::regWrite(u8 ID, u8 MemAddr, u8 *nDat, u8 nLen)
 	return Ack(ID);
 }
 
-//Í¬²½Ð´Ö¸Áî
-//¶æ»úID[]Êý×é£¬IDNÊý×é³¤¶È£¬MemAddrÄÚ´æ±íµØÖ·£¬Ð´ÈëÊý¾Ý£¬Ð´Èë³¤¶È
+//Í¬ï¿½ï¿½Ð´Ö¸ï¿½ï¿½
+//ï¿½ï¿½ï¿½ID[]ï¿½ï¿½ï¿½é£¬IDNï¿½ï¿½ï¿½é³¤ï¿½È£ï¿½MemAddrï¿½Ú´ï¿½ï¿½ï¿½Ö·ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½Ð´ï¿½ë³¤ï¿½ï¿½
 void SCSProtocol::snycWrite(u8 ID[], u8 IDN, u8 MemAddr, u8 *nDat, u8 nLen)
 {
-	u8 mesLen = ((nLen+1)*IDN+4);
+	u8 mesLen = ((nLen + 1) * IDN + 4);
 	u8 Sum = 0;
 	u8 bBuf[7];
 	bBuf[0] = 0xff;
@@ -110,21 +124,37 @@ void SCSProtocol::snycWrite(u8 ID[], u8 IDN, u8 MemAddr, u8 *nDat, u8 nLen)
 
 	Sum = 0xfe + mesLen + INST_SYNC_WRITE + MemAddr + nLen;
 	u8 i, j;
-	for(i=0; i<IDN; i++){
+	for (i = 0; i < IDN; i++)
+	{
 		writeSCS(ID[i]);
 		writeSCS(nDat, nLen);
 		Sum += ID[i];
-		for(j=0; j<nLen; j++){
+		for (j = 0; j < nLen; j++)
+		{
 			Sum += nDat[j];
 		}
 	}
 	writeSCS(~Sum);
 }
 
+void SCSProtocol::WritePing(u8 ID)
+{
+	u8 Sum = 0;
+	u8 bBuf[8];
+	bBuf[0] = 0xff;
+	bBuf[1] = 0xff;
+	bBuf[2] = 0x01;
+	bBuf[3] = 0x04;
+	bBuf[4] = 0x02;
+	bBuf[5] = 0x38;
+	bBuf[6] = 0x02;
+	bBuf[7] = 0xBE;
+	writeSCS(bBuf, 8);
+}
 
 void SCSProtocol::DeltasnycWrite(u8 MemAddr, u8 *nDat1, u8 *nDat2, u8 *nDat3, u8 nLen)
 {
-	u8 mesLen = ((nLen+1)*3+4);
+	u8 mesLen = ((nLen + 1) * 3 + 4);
 	u8 Sum = 0;
 	u8 bBuf[7];
 	bBuf[0] = 0xff;
@@ -138,25 +168,28 @@ void SCSProtocol::DeltasnycWrite(u8 MemAddr, u8 *nDat1, u8 *nDat2, u8 *nDat3, u8
 
 	Sum = 0xfe + mesLen + INST_SYNC_WRITE + MemAddr + nLen;
 	u8 j;
-	
+
 	writeSCS(1);
 	writeSCS(nDat1, nLen);
 	Sum += 1;
-		for(j=0; j<nLen; j++){
-			Sum += nDat1[j];
-		}
-    writeSCS(2);
+	for (j = 0; j < nLen; j++)
+	{
+		Sum += nDat1[j];
+	}
+	writeSCS(2);
 	writeSCS(nDat2, nLen);
 	Sum += 2;
-		for(j=0; j<nLen; j++){
-			Sum += nDat2[j];
-		}
+	for (j = 0; j < nLen; j++)
+	{
+		Sum += nDat2[j];
+	}
 	writeSCS(3);
 	writeSCS(nDat3, nLen);
 	Sum += 3;
-		for(j=0; j<nLen; j++){
-			Sum += nDat3[j];
-		}
+	for (j = 0; j < nLen; j++)
+	{
+		Sum += nDat3[j];
+	}
 	writeSCS(~Sum);
 }
 
@@ -171,7 +204,7 @@ int SCSProtocol::writeWord(u8 ID, u8 MemAddr, u16 wDat)
 {
 	flushSCS();
 	u8 buf[2];
-	Host2SCS(buf+0, buf+1, wDat);
+	Host2SCS(buf + 0, buf + 1, wDat);
 	writeBuf(ID, MemAddr, buf, 2, INST_WRITE);
 	return Ack(ID);
 }
@@ -185,22 +218,22 @@ int SCSProtocol::writePos(u8 ID, u16 Position, u16 Time, u16 Speed, u8 Fun)
 {
 	flushSCS();
 	u8 buf[6];
-	Host2SCS(buf+0, buf+1, Position);
-	Host2SCS(buf+2, buf+3, Time);
-	Host2SCS(buf+4, buf+5, Speed);
+	Host2SCS(buf + 0, buf + 1, Position);
+	Host2SCS(buf + 2, buf + 3, Time);
+	Host2SCS(buf + 4, buf + 5, Speed);
 	writeBuf(ID, P_GOAL_POSITION_L, buf, 6, Fun);
 	return Ack(ID);
 }
 
-//Ð´Î»ÖÃÖ¸Áî
-//¶æ»úID£¬PositionÎ»ÖÃ£¬Ö´ÐÐÊ±¼äTime£¬Ö´ÐÐËÙ¶ÈSpeed
+//Ð´Î»ï¿½ï¿½Ö¸ï¿½ï¿½
+//ï¿½ï¿½ï¿½IDï¿½ï¿½PositionÎ»ï¿½Ã£ï¿½Ö´ï¿½ï¿½Ê±ï¿½ï¿½Timeï¿½ï¿½Ö´ï¿½ï¿½ï¿½Ù¶ï¿½Speed
 int SCSProtocol::WritePos(u8 ID, u16 Position, u16 Time, u16 Speed)
 {
 	return writePos(ID, Position, Time, Speed, INST_WRITE);
 }
 
-//Òì²½Ð´Î»ÖÃÖ¸Áî
-//¶æ»úID£¬PositionÎ»ÖÃ£¬Ö´ÐÐÊ±¼äTime£¬Ö´ÐÐËÙ¶ÈSpeed
+//ï¿½ì²½Ð´Î»ï¿½ï¿½Ö¸ï¿½ï¿½
+//ï¿½ï¿½ï¿½IDï¿½ï¿½PositionÎ»ï¿½Ã£ï¿½Ö´ï¿½ï¿½Ê±ï¿½ï¿½Timeï¿½ï¿½Ö´ï¿½ï¿½ï¿½Ù¶ï¿½Speed
 int SCSProtocol::RegWritePos(u8 ID, u16 Position, u16 Time, u16 Speed)
 {
 	return writePos(ID, Position, Time, Speed, INST_REG_WRITE);
@@ -211,117 +244,129 @@ void SCSProtocol::RegWriteAction()
 	writeBuf(0xfe, 0, NULL, 0, INST_ACTION);
 }
 
-//Ð´Î»ÖÃÖ¸Áî
-//¶æ»úID[]Êý×é£¬IDNÊý×é³¤¶È£¬PositionÎ»ÖÃ£¬Ö´ÐÐÊ±¼äTime£¬Ö´ÐÐËÙ¶ÈSpeed
+//Ð´Î»ï¿½ï¿½Ö¸ï¿½ï¿½
+//ï¿½ï¿½ï¿½ID[]ï¿½ï¿½ï¿½é£¬IDNï¿½ï¿½ï¿½é³¤ï¿½È£ï¿½PositionÎ»ï¿½Ã£ï¿½Ö´ï¿½ï¿½Ê±ï¿½ï¿½Timeï¿½ï¿½Ö´ï¿½ï¿½ï¿½Ù¶ï¿½Speed
 void SCSProtocol::SyncWritePos(u8 ID[], u8 IDN, u16 Position, u16 Time, u16 Speed)
 {
 	u8 buf[6];
-	Host2SCS(buf+0, buf+1, Position);
-	Host2SCS(buf+2, buf+3, Time);
-	Host2SCS(buf+4, buf+5, Speed);
+	Host2SCS(buf + 0, buf + 1, Position);
+	Host2SCS(buf + 2, buf + 3, Time);
+	Host2SCS(buf + 4, buf + 5, Speed);
 	snycWrite(ID, IDN, P_GOAL_POSITION_L, buf, 6);
 }
 
-void SCSProtocol::DeltaSyncWritePos(u16 Position1, u16 Time1, u16 Speed1,u16 Position2, u16 Time2, u16 Speed2,u16 Position3, u16 Time3, u16 Speed3)
+void SCSProtocol::DeltaSyncWritePos(u16 Position1, u16 Time1, u16 Speed1, u16 Position2, u16 Time2, u16 Speed2, u16 Position3, u16 Time3, u16 Speed3)
 {
 	u8 buf1[6];
-	Host2SCS(buf1+0, buf1+1, Position1);
-	Host2SCS(buf1+2, buf1+3, Time1);
-	Host2SCS(buf1+4, buf1+5, Speed1);
-	
+	Host2SCS(buf1 + 0, buf1 + 1, Position1);
+	Host2SCS(buf1 + 2, buf1 + 3, Time1);
+	Host2SCS(buf1 + 4, buf1 + 5, Speed1);
+
 	u8 buf2[6];
-	Host2SCS(buf2+0, buf2+1, Position2);
-	Host2SCS(buf2+2, buf2+3, Time2);
-	Host2SCS(buf2+4, buf2+5, Speed2);
-    
-    u8 buf3[6];
-    Host2SCS(buf3+0, buf3+1, Position3);
-	Host2SCS(buf3+2, buf3+3, Time3);
-	Host2SCS(buf3+4, buf3+5, Speed3);
+	Host2SCS(buf2 + 0, buf2 + 1, Position2);
+	Host2SCS(buf2 + 2, buf2 + 3, Time2);
+	Host2SCS(buf2 + 4, buf2 + 5, Speed2);
+
+	u8 buf3[6];
+	Host2SCS(buf3 + 0, buf3 + 1, Position3);
+	Host2SCS(buf3 + 2, buf3 + 3, Time3);
+	Host2SCS(buf3 + 4, buf3 + 5, Speed3);
 
 	DeltasnycWrite(P_GOAL_POSITION_L, buf1, buf2, buf3, 6);
 }
 
-//¶ÁÖ¸Áî
-//¶æ»úID£¬MemAddrÄÚ´æ±íµØÖ·£¬·µ»ØÊý¾ÝnData£¬Êý¾Ý³¤¶ÈnLen
+//ï¿½ï¿½Ö¸ï¿½ï¿½
+//ï¿½ï¿½ï¿½IDï¿½ï¿½MemAddrï¿½Ú´ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½nDataï¿½ï¿½ï¿½ï¿½ï¿½Ý³ï¿½ï¿½ï¿½nLen
 int SCSProtocol::Read(u8 ID, u8 MemAddr, u8 *nData, u8 nLen)
 {
 	flushSCS();
 	writeBuf(ID, MemAddr, &nLen, 1, INST_READ);
 	u8 bBuf[5];
-	if(readSCS(bBuf, 5)!=5){
+	int Size_1 = readSCS(bBuf, 5);
+	if (Size_1 != 5)
+	{
 		return 0;
 	}
 	int Size = readSCS(nData, nLen);
-	if(readSCS(bBuf, 1)){
+	if (readSCS(bBuf, 1))
+	{
 		return Size;
 	}
 	return 0;
 }
 
-//¶Á1×Ö½Ú£¬³¬Ê±·µ»Ø-1
+//ï¿½ï¿½1ï¿½Ö½Ú£ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½-1
 int SCSProtocol::readByte(u8 ID, u8 MemAddr)
 {
 	u8 bDat;
 	int Size = Read(ID, MemAddr, &bDat, 1);
-	if(Size!=1){
+	if (Size != 1)
+	{
 		return -1;
-	}else{
+	}
+	else
+	{
 		return bDat;
 	}
 }
 
-//¶Á2×Ö½Ú£¬³¬Ê±·µ»Ø-1
+//ï¿½ï¿½2ï¿½Ö½Ú£ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½-1
 int SCSProtocol::readWord(u8 ID, u8 MemAddr)
-{	
+{
 	u8 nDat[2];
 	int Size;
 	u16 wDat;
 	Size = Read(ID, MemAddr, nDat, 2);
-	if(Size!=2)
+	//std::cout << "size = " << Size << std::endl;
+	if (Size != 2)
 		return -1;
 	wDat = SCS2Host(nDat[0], nDat[1]);
 	return wDat;
 }
 
-//¶ÁÎ»ÖÃ£¬³¬Ê±·µ»Ø-1
+//ï¿½ï¿½Î»ï¿½Ã£ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½-1
 int SCSProtocol::ReadPos(u8 ID)
 {
 	return readWord(ID, P_PRESENT_POSITION_L);
 }
 
-//¶àÈ¦¿ØÖÆÖ¸Áî
+//ï¿½ï¿½È¦ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
 int SCSProtocol::WriteSpe(u8 ID, s16 Speed)
 {
-	if(Speed<0){
+	if (Speed < 0)
+	{
 		Speed = -Speed;
-		Speed |= (1<<10);
+		Speed |= (1 << 10);
 	}
-	return writeWord(ID, P_GOAL_TIME_L, Speed);
+	//return writeWord(ID, P_GOAL_TIME_L, Speed);
+	return writeWord(ID, P_GOAL_SPEED_L, Speed);
 }
 
-//¶ÁµçÑ¹£¬³¬Ê±·µ»Ø-1
+//ï¿½ï¿½ï¿½ï¿½Ñ¹ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½-1
 int SCSProtocol::ReadVoltage(u8 ID)
-{	
+{
 	return readByte(ID, P_PRESENT_VOLTAGE);
 }
 
-//¶ÁÎÂ¶È£¬³¬Ê±·µ»Ø-1
+//ï¿½ï¿½ï¿½Â¶È£ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½-1
 int SCSProtocol::ReadTemper(u8 ID)
-{	
+{
 	return readByte(ID, P_PRESENT_TEMPERATURE);
 }
 
-//PingÖ¸Áî£¬·µ»Ø¶æ»úID£¬³¬Ê±·µ»Ø-1
+//PingÖ¸ï¿½î£¬ï¿½ï¿½ï¿½Ø¶ï¿½ï¿½IDï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½-1
 int SCSProtocol::Ping(u8 ID)
 {
 	flushSCS();
 	u8 bBuf[6];
 	writeBuf(ID, 0, NULL, 0, INST_PING);
 	int Size = readSCS(bBuf, 6);
-	if(Size==6){
+	if (Size == 6)
+	{
 		return bBuf[2];
-	}else{
+	}
+	else
+	{
 		return -1;
 	}
 }
@@ -339,12 +384,12 @@ int SCSProtocol::wheelMode(u8 ID)
 int SCSProtocol::joinMode(u8 ID, u16 minAngle, u16 maxAngle)
 {
 	u8 bBuf[4];
-	Host2SCS(bBuf, bBuf+1, minAngle);
-	Host2SCS(bBuf+2, bBuf+3, maxAngle);
+	Host2SCS(bBuf, bBuf + 1, minAngle);
+	Host2SCS(bBuf + 2, bBuf + 3, maxAngle);
 	return genWrite(ID, P_MIN_ANGLE_LIMIT_L, bBuf, 4);
 }
 
-//¸´Î»¶æ»ú²ÎÊýÎªÄ¬ÈÏÖµ
+//ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÎªÄ¬ï¿½ï¿½Öµ
 int SCSProtocol::Reset(u8 ID)
 {
 	flushSCS();
@@ -352,12 +397,14 @@ int SCSProtocol::Reset(u8 ID)
 	return Ack(ID);
 }
 
-int	SCSProtocol::Ack(u8 ID)
+int SCSProtocol::Ack(u8 ID)
 {
-	if(ID != 0xfe && Level){
+	if (ID != 0xfe && Level)
+	{
 		u8 buf[6];
 		u8 Size = readSCS(buf, 6);
-		if(Size!=6){
+		if (Size != 6)
+		{
 			return 0;
 		}
 	}

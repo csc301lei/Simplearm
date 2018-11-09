@@ -1,122 +1,126 @@
 /*
  * SCSProtocol.h
- * SCS´®ÐÐ¶æ»úÐ­Òé³ÌÐò
- * ÈÕÆÚ: 2016.8.25
- * ×÷Õß: Ì·ÐÛÀÖ
+ * SCSï¿½ï¿½ï¿½Ð¶ï¿½ï¿½Ð­ï¿½ï¿½ï¿½ï¿½ï¿½
+ * ï¿½ï¿½ï¿½ï¿½: 2016.8.25
+ * ï¿½ï¿½ï¿½ï¿½: Ì·ï¿½ï¿½ï¿½ï¿½
  */
 
 #ifndef _SCSPROTOCOL_H
 #define _SCSPROTOCOL_H
 
-typedef		char			s8;
-typedef		unsigned char	u8;	
-typedef		unsigned short	u16;	
-typedef		short			s16;
-typedef		unsigned long	u32;	
-typedef		long			s32;
+typedef char s8;
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef short s16;
+typedef unsigned long u32;
+typedef long s32;
 
-class SCSProtocol{
-public:
+class SCSProtocol
+{
+  public:
 	SCSProtocol();
-	int genWrite(u8 ID, u8 MemAddr, u8 *nDat, u8 nLen);//ÆÕÍ¨Ð´Ö¸Áî
-	int regWrite(u8 ID, u8 MemAddr,u8 *nDat, u8 nLen);//Òì²½Ð´Ö¸Áî
-	void snycWrite(u8 ID[], u8 IDN, u8 MemAddr, u8 *nDat, u8 nLen);//Í¬²½Ð´Ö¸Áî
-	int writeByte(u8 ID, u8 MemAddr, u8 bDat);//Ð´1¸ö×Ö½Ú
-	int writeWord(u8 ID, u8 MemAddr, u16 wDat);//Ð´2¸ö×Ö½Ú
-	int EnableTorque(u8 ID, u8 Enable);//Å¤Á¦¿ØÖÆÖ¸Áî
-	int WritePos(u8 ID, u16 Position, u16 Time, u16 Speed = 0);//ÆÕÍ¨Ð´Î»ÖÃÖ¸Áî
-	int RegWritePos(u8 ID, u16 Position, u16 Time, u16 Speed = 0);//Òì²½Ð´Î»ÖÃÖ¸Áî
-	void RegWriteAction();//Ö´ÐÐÒì²½Ð´Ö¸Áî
-	void SyncWritePos(u8 ID[], u8 IDN, u16 Position, u16 Time, u16 Speed = 0);//Í¬²½Ð´Î»ÖÃÖ¸Áî
-	void DeltaSyncWritePos(u16 Position1, u16 Time1, u16 Speed1,u16 Position2, u16 Time2, u16 Speed2,u16 Position3, u16 Time3, u16 Speed3);
+	int genWrite(u8 ID, u8 MemAddr, u8 *nDat, u8 nLen);						   //ï¿½ï¿½Í¨Ð´Ö¸ï¿½ï¿½
+	int regWrite(u8 ID, u8 MemAddr, u8 *nDat, u8 nLen);						   //ï¿½ì²½Ð´Ö¸ï¿½ï¿½
+	void snycWrite(u8 ID[], u8 IDN, u8 MemAddr, u8 *nDat, u8 nLen);			   //Í¬ï¿½ï¿½Ð´Ö¸ï¿½ï¿½
+	int writeByte(u8 ID, u8 MemAddr, u8 bDat);								   //Ð´1ï¿½ï¿½ï¿½Ö½ï¿½
+	int writeWord(u8 ID, u8 MemAddr, u16 wDat);								   //Ð´2ï¿½ï¿½ï¿½Ö½ï¿½
+	int EnableTorque(u8 ID, u8 Enable);										   //Å¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+	int WritePos(u8 ID, u16 Position, u16 Time, u16 Speed = 0);				   //ï¿½ï¿½Í¨Ð´Î»ï¿½ï¿½Ö¸ï¿½ï¿½
+	int RegWritePos(u8 ID, u16 Position, u16 Time, u16 Speed = 0);			   //ï¿½ì²½Ð´Î»ï¿½ï¿½Ö¸ï¿½ï¿½
+	void RegWriteAction();													   //Ö´ï¿½ï¿½ï¿½ì²½Ð´Ö¸ï¿½ï¿½
+	void SyncWritePos(u8 ID[], u8 IDN, u16 Position, u16 Time, u16 Speed = 0); //Í¬ï¿½ï¿½Ð´Î»ï¿½ï¿½Ö¸ï¿½ï¿½
+	void DeltaSyncWritePos(u16 Position1, u16 Time1, u16 Speed1, u16 Position2, u16 Time2, u16 Speed2, u16 Position3, u16 Time3, u16 Speed3);
 	void DeltasnycWrite(u8 MemAddr, u8 *nDat1, u8 *nDat2, u8 *nDat3, u8 nLen);
-	int WriteSpe(u8 ID, s16 Speed);//¶àÈ¦¿ØÖÆÖ¸Áî
-	int Read(u8 ID, u8 MemAddr, u8 *nData, u8 nLen);//¶ÁÖ¸Áî
-	int readByte(u8 ID, u8 MemAddr);//¶Á1¸ö×Ö½Ú
-	int readWord(u8 ID, u8 MemAddr);//¶Á2¸ö×Ö½Ú
-	int ReadPos(u8 ID);//¶ÁÎ»ÖÃ
-	int ReadVoltage(u8 ID);//¶ÁµçÑ¹
-	int ReadTemper(u8 ID);//¼ÇÎÂ¶È
-	int Ping(u8 ID);//PingÖ¸Áî
-	int wheelMode(u8 ID);//¶àÈ¦ÂÖ×ÓÄ£Ê½
-	int joinMode(u8 ID, u16 minAngle=0, u16 maxAngle=1023);//ÆÕÍ¨ËÅ·þÄ£Ê½
-	int Reset(u8 ID);//¸´Î»¶æ»ú²ÎÊýÎªÄ¬ÈÏÖµ
-public:
-	u8	Level;//¶æ»ú·µ»ØµÈ¼¶
-	u8	End;//´¦ÀíÆ÷´óÐ¡¶Ë½á¹¹
-protected:
+	int WriteSpe(u8 ID, s16 Speed);								//ï¿½ï¿½È¦ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+	int Read(u8 ID, u8 MemAddr, u8 *nData, u8 nLen);			//ï¿½ï¿½Ö¸ï¿½ï¿½
+	int readByte(u8 ID, u8 MemAddr);							//ï¿½ï¿½1ï¿½ï¿½ï¿½Ö½ï¿½
+	int readWord(u8 ID, u8 MemAddr);							//ï¿½ï¿½2ï¿½ï¿½ï¿½Ö½ï¿½
+	int ReadPos(u8 ID);											//ï¿½ï¿½Î»ï¿½ï¿½
+	int ReadVoltage(u8 ID);										//ï¿½ï¿½ï¿½ï¿½Ñ¹
+	int ReadTemper(u8 ID);										//ï¿½ï¿½ï¿½Â¶ï¿½
+	int Ping(u8 ID);											//PingÖ¸ï¿½ï¿½
+	int wheelMode(u8 ID);										//ï¿½ï¿½È¦ï¿½ï¿½ï¿½ï¿½Ä£Ê½
+	int joinMode(u8 ID, u16 minAngle = 0, u16 maxAngle = 1023); //ï¿½ï¿½Í¨ï¿½Å·ï¿½Ä£Ê½
+	int Reset(u8 ID);											//ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÎªÄ¬ï¿½ï¿½Öµ
+	void WritePing(u8 ID);
+
+  public:
+	u8 Level; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ØµÈ¼ï¿½
+	u8 End;   //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½Ë½á¹¹
+  protected:
 	virtual int writeSCS(unsigned char *nDat, int nLen) = 0;
 	virtual int readSCS(unsigned char *nDat, int nLen) = 0;
 	virtual int writeSCS(unsigned char bDat) = 0;
 	virtual void flushSCS() = 0;
-private:
+
+  private:
 	void writeBuf(u8 ID, u8 MemAddr, u8 *nDat, u8 nLen, u8 Fun);
 	int writePos(u8 ID, u16 Position, u16 Time, u16 Speed, u8 Fun);
-	void Host2SCS(u8 *DataL, u8* DataH, int Data);//1¸ö16Î»Êý²ð·ÖÎª2¸ö8Î»Êý
-	int	SCS2Host(u8 DataL, u8 DataH);//2¸ö8Î»Êý×éºÏÎª1¸ö16Î»Êý
-	int	Ack(u8 ID);//·µ»ØÓ¦´ð
+	void Host2SCS(u8 *DataL, u8 *DataH, int Data); //1ï¿½ï¿½16Î»ï¿½ï¿½ï¿½ï¿½ï¿½Îª2ï¿½ï¿½8Î»ï¿½ï¿½
+	int SCS2Host(u8 DataL, u8 DataH);			   //2ï¿½ï¿½8Î»ï¿½ï¿½ï¿½ï¿½ï¿½Îª1ï¿½ï¿½16Î»ï¿½ï¿½
+	int Ack(u8 ID);								   //ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½
 
-	#define		B_1M		0
-	#define		B_0_5M		1
-	#define		B_250K		2
-	#define		B_128K		3
-	#define		B_115200	4
-	#define		B_76800		5
-	#define		B_57600		6
-	#define		B_38400		7
+#define B_1M 0
+#define B_0_5M 1
+#define B_250K 2
+#define B_128K 3
+#define B_115200 4
+#define B_76800 5
+#define B_57600 6
+#define B_38400 7
 
-	//register Address
-	#define P_VERSION_L 3
-	#define P_VERSION_H 4
-	#define P_ID 5
-	#define P_BAUD_RATE 6
-	#define P_RETURN_DELAY_TIME 7
-	#define P_RETURN_LEVEL 8
-	#define P_MIN_ANGLE_LIMIT_L 9
-	#define P_MIN_ANGLE_LIMIT_H 10
-	#define P_MAX_ANGLE_LIMIT_L 11
-	#define P_MAX_ANGLE_LIMIT_H 12
-	#define P_LIMIT_TEMPERATURE 13
-	#define P_MAX_LIMIT_VOLTAGE 14
-	#define P_MIN_LIMIT_VOLTAGE 15
-	#define P_MAX_TORQUE_L 16
-	#define P_MAX_TORQUE_H 17
-	#define P_ALARM_LED 19
-	#define P_ALARM_SHUTDOWN 20
-	#define P_COMPLIANCE_P 21
-	#define P_PUNCH_L 24
-	#define P_PUNCH_H 25
-	#define P_CW_DEAD 26
-	#define P_CCW_DEAD 27
+//register Address
+#define P_VERSION_L 3
+#define P_VERSION_H 4
+#define P_ID 5
+#define P_BAUD_RATE 6
+#define P_RETURN_DELAY_TIME 7
+#define P_RETURN_LEVEL 8
+#define P_MIN_ANGLE_LIMIT_L 9
+#define P_MIN_ANGLE_LIMIT_H 10
+#define P_MAX_ANGLE_LIMIT_L 11
+#define P_MAX_ANGLE_LIMIT_H 12
+#define P_LIMIT_TEMPERATURE 13
+#define P_MAX_LIMIT_VOLTAGE 14
+#define P_MIN_LIMIT_VOLTAGE 15
+#define P_MAX_TORQUE_L 16
+#define P_MAX_TORQUE_H 17
+#define P_ALARM_LED 19
+#define P_ALARM_SHUTDOWN 20
+#define P_COMPLIANCE_P 21
+#define P_PUNCH_L 24
+#define P_PUNCH_H 25
+#define P_CW_DEAD 26
+#define P_CCW_DEAD 27
 
-	#define P_TORQUE_ENABLE 40
-	#define P_LED 41
-	#define P_GOAL_POSITION_L 42
-	#define P_GOAL_POSITION_H 43
-	#define P_GOAL_TIME_L 44
-	#define P_GOAL_TIME_H 45
-	#define P_GOAL_SPEED_L 46
-	#define P_GOAL_SPEED_H 47
-	#define P_LOCK 48
+#define P_TORQUE_ENABLE 40
+#define P_LED 41
+#define P_GOAL_POSITION_L 42
+#define P_GOAL_POSITION_H 43
+#define P_GOAL_TIME_L 44
+#define P_GOAL_TIME_H 45
+#define P_GOAL_SPEED_L 46
+#define P_GOAL_SPEED_H 47
+#define P_LOCK 48
 
-	#define P_PRESENT_POSITION_L 56
-	#define P_PRESENT_POSITION_H 57
-	#define P_PRESENT_SPEED_L 58
-	#define P_PRESENT_SPEED_H 59
-	#define P_PRESENT_LOAD_L 60
-	#define P_PRESENT_LOAD_H 61
-	#define P_PRESENT_VOLTAGE 62
-	#define P_PRESENT_TEMPERATURE 63
-	#define P_REGISTERED_INSTRUCTION 64
-	#define P_MOVING 66
+#define P_PRESENT_POSITION_L 56
+#define P_PRESENT_POSITION_H 57
+#define P_PRESENT_SPEED_L 58
+#define P_PRESENT_SPEED_H 59
+#define P_PRESENT_LOAD_L 60
+#define P_PRESENT_LOAD_H 61
+#define P_PRESENT_VOLTAGE 62
+#define P_PRESENT_TEMPERATURE 63
+#define P_REGISTERED_INSTRUCTION 64
+#define P_MOVING 66
 
-	//Instruction:
-	#define INST_PING 0x01
-	#define INST_READ 0x02
-	#define INST_WRITE 0x03
-	#define INST_REG_WRITE 0x04
-	#define INST_ACTION 0x05
-	#define INST_RESET 0x06
-	#define INST_SYNC_WRITE 0x83
+//Instruction:
+#define INST_PING 0x01
+#define INST_READ 0x02
+#define INST_WRITE 0x03
+#define INST_REG_WRITE 0x04
+#define INST_ACTION 0x05
+#define INST_RESET 0x06
+#define INST_SYNC_WRITE 0x83
 };
 #endif

@@ -1,26 +1,26 @@
 #ifndef SIMPLE_ARM_H
 #define SIMPLE_ARM_H
 
-#include "ros/ros.h"
 #include <geometry_msgs/PoseStamped.h>
+#include "ros/ros.h"
 
-#include <iostream>
-#include <vector>
-#include <cmath>
+#include <curses.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <termios.h>
-#include <curses.h>
-#include <unistd.h>
 #include <term.h>
+#include <termios.h>
+#include <unistd.h>
+#include <cmath>
+#include <iostream>
+#include <vector>
 
-#include "math.h"
-#include "Serial.cpp"
 #include "SCServo.cpp"
+//#include "Serial.cpp"
+#include "math.h"
 
 #define PI 3.141592653589793
-#define P_armvel_x 0.1
-#define P_armvel_y 0.1
+#define P_armvel_x 1
+#define P_armvel_y 1
 
 class ArmPos
 {
@@ -47,16 +47,13 @@ public:
   ArmPos tarpos;
   ~SimpleArm()
   {
-    /*
+
     servo.DeltaSyncWritePos(0, 0, 800,
                             4000, 0, 800,
                             0, 0, 0);
-                            */
   }
 
-  void Update()
-  {
-  }
+  void Update() {}
 };
 
 #endif

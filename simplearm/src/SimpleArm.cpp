@@ -66,7 +66,7 @@ int readch()
 //SimpleArm::SimpleArm(ros::NodeHandle n) : nh(n)
 SimpleArm::SimpleArm(ros::NodeHandle n)
 {
-	/*
+
 	char act;
 	cout << "choose action:" << endl;
 	cin >> act;
@@ -78,7 +78,7 @@ SimpleArm::SimpleArm(ros::NodeHandle n)
 								0, 0, 0);
 		cout << "reset done.\n";
 	}
-	*/
+
 	//curPoseSub = nh.subscribe("/Robot_1/pose", 3, &SimpleArm::callbackCurPose, this);
 	//tarPoseSub = nh.subscribe("/Robot_2/pose", 3, &SimpleArm::callbackTarPose, this);
 }
@@ -184,15 +184,22 @@ void SimpleArm::calcJointVel(ArmPos &armpos)
 	double L1 = 0.37, L2 = 0.45;
 	//armpos.y = armpos.y - 0.21;
 	double theta_1, theta_2;
+
 	theta_1 = servo.ReadPos(1);
 	theta_2 = servo.ReadPos(2);
-	cout << "theta1_cur= " << theta_1 << endl;
-	cout << "theta2_cur= " << theta_2 << endl;
+	cout << "theta1_data= " << theta_1 << endl;
+	cout << "theta2_data= " << theta_2 << endl;
 	armpos.x = -armpos.x;
 	ArmPos terminal_pos;
 	ArmPos P_target_pos;
+	theta_1 = (theta_1 * 0.088) * PI / 180;
+	theta_2 = ((theta_2 - 2000) * 0.088) * PI / 180;
+	cout << "theta1_cur= " << theta_1 * 180 / PI << endl;
+	cout << "theta2_cur= " << theta_2 * 180 / PI << endl;
 	terminal_pos.x = L1 * cos(theta_1) + L2 * cos(theta_1 + theta_2);
 	terminal_pos.y = L1 * sin(theta_1) + L2 * sin(theta_1 + theta_2);
+	cout << "current x = " << terminal_pos.x << endl;
+	cout << "current y = " << terminal_pos.y << endl;
 	P_target_pos.x = armpos.x - terminal_pos.x;
 	P_target_pos.y = armpos.y - terminal_pos.y;
 	cout << "P_TARGET_POS.X= " << P_target_pos.x << endl;
@@ -203,20 +210,38 @@ void SimpleArm::calcJointVel(ArmPos &armpos)
 	double theta1_vel, theta2_vel;
 	theta1_vel = L2 * cos(theta_1 + theta_2) * arm_x_vel + L2 * sin(theta_1 + theta_2) * arm_y_vel;
 	theta1_vel = theta1_vel / (L1 * L2 * sin(theta_2));
+	theta1_vel = theta1_vel * 180 / PI;
 	theta2_vel = (-L1 * cos(theta_1) - L2 * cos(theta_1 + theta_2)) * arm_x_vel + (-L1 * sin(theta_1) - L2 * sin(theta_1 + theta_2)) * arm_y_vel;
 	theta2_vel = theta2_vel / (L1 * L2 * sin(theta_2));
+	theta2_vel = theta2_vel * 180 / PI;
 	cout << "theta1_vel" << theta1_vel << endl;
 	cout << "theta2_vel" << theta2_vel << endl;
 
-	//ServoVelControl(theta1_vel, theta2_vel);
+	ServoVelControl(theta1_vel, theta2_vel);
 }
 void SimpleArm::ServoVelControl(double theta1_vel, double theta2_vel)
 {
 	double outValue1, outValue2;
-	outValue1 = (theta1_vel * 180 / PI) / 0.088;
+	outValue1 = theta1_vel / 0.088;
 	cout << "servo1_vel:" << outValue1 << endl;
-	outValue2 = 2000 + (theta2_vel * 180 / PI) / 0.088;
+	outValue2 = theta2_vel / 0.088;
 	cout << "servo2_vel:" << outValue2 << endl;
+	if (outValue1 > 800)
+	{
+		outValue1 = 800;
+	}
+	if (outValue1 < -800)
+	{
+		outValue1 = -800;
+	}
+	if (outValue2 > 800)
+	{
+		outValue2 = 800;
+	}
+	if (outValue2 < -800)
+	{
+		outValue2 = -800;
+	}
 	servo.WriteSpe(1, outValue1);
 	servo.WriteSpe(2, outValue2);
 }
