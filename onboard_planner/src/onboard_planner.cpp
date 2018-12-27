@@ -2,12 +2,18 @@
 
 using namespace std;
 using namespace ros;
-
+/*
 WayPointsTracker::WayPointsTracker(bool VelocityControl, bool LoopMode, double MaxHorizVel,
                                    double MaxVertVel, double MaxYawRate, double MaxRelHorizDist,
                                    double TolR, double TolYaw, std::vector<WayPoint> AllWayPoints) : velControl(VelocityControl), loopMode(LoopMode), maxHorizVel(MaxHorizVel),
                                                                                                      maxVertVel(MaxVertVel), maxYawRate(MaxYawRate), maxRelHorizDist(MaxRelHorizDist),
                                                                                                      tolR(TolR), tolYaw(TolYaw), allWayPoints(AllWayPoints)
+*/
+WayPointsTracker::WayPointsTracker(bool VelocityControl, bool LoopMode, double MaxHorizVel,
+                                   double MaxVertVel, double MaxYawRate, double MaxRelHorizDist,
+                                   double TolR, double TolYaw) : velControl(VelocityControl), loopMode(LoopMode), maxHorizVel(MaxHorizVel),
+                                                                 maxVertVel(MaxVertVel), maxYawRate(MaxYawRate), maxRelHorizDist(MaxRelHorizDist),
+                                                                 tolR(TolR), tolYaw(TolYaw)
 {
     allTracked = false;
     curWayPointId = 0;
@@ -16,6 +22,7 @@ WayPointsTracker::WayPointsTracker(bool VelocityControl, bool LoopMode, double M
 
 bool WayPointsTracker::updateCurWayPoint(WayPoint &curPosTime, WayPoint &deltaPosDur)
 {
+    /*
     if (allWayPoints.size() == 0)
     {
         // No WayPoint is provided, track (0,0,0,0)
@@ -32,40 +39,44 @@ bool WayPointsTracker::updateCurWayPoint(WayPoint &curPosTime, WayPoint &deltaPo
     }
     else
     {
-        deltaPosDur.x = allWayPoints[curWayPointId].x - curPosTime.x;
-        deltaPosDur.y = allWayPoints[curWayPointId].y - curPosTime.y;
-        deltaPosDur.z = allWayPoints[curWayPointId].z - curPosTime.z;
-        deltaPosDur.yaw = allWayPoints[curWayPointId].yaw - curPosTime.yaw;
-        deltaPosDur.yaw = deltaPosDur.yaw < -PI_LOCAL ? (deltaPosDur.yaw + 2 * PI_LOCAL) : (deltaPosDur.yaw);
-        deltaPosDur.yaw = deltaPosDur.yaw > PI_LOCAL ? (deltaPosDur.yaw - 2 * PI_LOCAL) : (deltaPosDur.yaw);
-        deltaPosDur.duration = allWayPoints[curWayPointId].duration - curPosTime.duration + lastWayPointTime;
+        */
+    deltaPosDur.x = targetWayPoint.x - curPosTime.x;
+    deltaPosDur.y = targetWayPoint.y - curPosTime.y;
+    deltaPosDur.z = targetWayPoint.z - curPosTime.z;
+    deltaPosDur.yaw = targetWayPoint.yaw - curPosTime.yaw;
+    deltaPosDur.yaw = deltaPosDur.yaw < -PI_LOCAL ? (deltaPosDur.yaw + 2 * PI_LOCAL) : (deltaPosDur.yaw);
+    deltaPosDur.yaw = deltaPosDur.yaw > PI_LOCAL ? (deltaPosDur.yaw - 2 * PI_LOCAL) : (deltaPosDur.yaw);
+    deltaPosDur.duration = targetWayPoint.duration - curPosTime.duration + lastWayPointTime;
 
-        double distPos = sqrt(deltaPosDur.x * deltaPosDur.x + deltaPosDur.y * deltaPosDur.y + deltaPosDur.z * deltaPosDur.z);
-        double distYaw = fabs(deltaPosDur.yaw);
-        if (distPos < tolR && distYaw < tolYaw && deltaPosDur.duration <= 0)
+    double distPos = sqrt(deltaPosDur.x * deltaPosDur.x + deltaPosDur.y * deltaPosDur.y + deltaPosDur.z * deltaPosDur.z);
+    double distYaw = fabs(deltaPosDur.yaw);
+    if (distPos < tolR && distYaw < tolYaw && deltaPosDur.duration <= 0)
+    {
+        //allTracked = curWayPointId == (allWayPoints.size() - 1);
+        allTracked = true;
+        /*
+        if (!allTracked)
         {
-            allTracked = curWayPointId == (allWayPoints.size() - 1);
-            if (!allTracked)
-            {
-                curWayPointId += 1;
-                lastWayPointTime = curPosTime.duration;
+            curWayPointId += 1;
+            lastWayPointTime = curPosTime.duration;
 
-                return true;
-            }
-            else if (allTracked && loopMode)
-            {
-                curWayPointId = 1;
-                lastWayPointTime = curPosTime.duration;
-                allTracked = false;
+            return true;
+        }
+        else if (allTracked && loopMode)
+        {
+            curWayPointId = 1;
+            lastWayPointTime = curPosTime.duration;
+            allTracked = false;
 
-                return true;
-            }
-            else
-                return false;
+            return true;
         }
         else
             return false;
+            */
+        return true;
     }
+    else
+        return false;
 }
 
 void WayPointsTracker::calcControl(WayPoint &deltaPosDur, Control &curControl)
@@ -135,27 +146,40 @@ Control WayPointsTracker::input(WayPoint &curPosTime)
     WayPoint deltaPosDur;
     Control curControl;
     updateCurWayPoint(curPosTime, deltaPosDur);
-    calcControl(deltaPosDur, curControl);
+    double distPos = sqrt(deltaPosDur.x * deltaPosDur.x + deltaPosDur.y * deltaPosDur.y + deltaPosDur.z * deltaPosDur.z);
+    if (distPos < 2)
+    {
+        calcControl(deltaPosDur, curControl);
+    }
+    else
+    {
+        deltaPosDur.x = 0;
+        deltaPosDur.y = 0;
+        deltaPosDur.z = 0;
+        calcControl(deltaPosDur, curControl);
+    }
     return curControl;
 }
 
 OnboardPlanner::OnboardPlanner(ros::NodeHandle n) : nh(n), nh_("~"), initialized(false), initialize_process_done(false)
 {
     string poseTopic;
+    /*
     vector<double> wayPointsVec_x;
     vector<double> wayPointsVec_y;
     vector<double> wayPointsVec_z;
     vector<double> wayPointsVec_yaw;
     vector<double> wayPointsVec_duration;
     vector<WayPoint> wayPoints;
+    */
     double MaxHorizVel, MaxVertVel, MaxYawRate, MaxRelHorizDist, TolR, TolYaw;
     bool VelocityControl, LoopMode;
     nh_.getParam("PoseTopic", poseTopic);
-    nh_.getParam("WayPointsVec_x", wayPointsVec_x);
-    nh_.getParam("WayPointsVec_y", wayPointsVec_y);
-    nh_.getParam("WayPointsVec_z", wayPointsVec_z);
-    nh_.getParam("WayPointsVec_yaw", wayPointsVec_yaw);
-    nh_.getParam("WayPointsVec_duration", wayPointsVec_duration);
+    //nh_.getParam("WayPointsVec_x", wayPointsVec_x);
+    //nh_.getParam("WayPointsVec_y", wayPointsVec_y);
+    //nh_.getParam("WayPointsVec_z", wayPointsVec_z);
+    //nh_.getParam("WayPointsVec_yaw", wayPointsVec_yaw);
+    //nh_.getParam("WayPointsVec_duration", wayPointsVec_duration);
     nh_.getParam("VelocityControl", VelocityControl);
     nh_.getParam("LoopMode", LoopMode);
     nh_.getParam("MaxHorizVel", MaxHorizVel);
@@ -164,6 +188,7 @@ OnboardPlanner::OnboardPlanner(ros::NodeHandle n) : nh(n), nh_("~"), initialized
     nh_.getParam("MaxRelHorizDist", MaxRelHorizDist);
     nh_.getParam("TolR", TolR);
     nh_.getParam("TolYaw", TolYaw);
+    /*
     for (long unsigned int i = 0; i < wayPointsVec_x.size(); i++)
     {
         WayPoint tempWayPoint;
@@ -174,8 +199,10 @@ OnboardPlanner::OnboardPlanner(ros::NodeHandle n) : nh(n), nh_("~"), initialized
         tempWayPoint.duration = wayPointsVec_duration[i];
         wayPoints.push_back(tempWayPoint);
     }
-    wayPointsTracker = WayPointsTracker(VelocityControl, LoopMode, MaxHorizVel, MaxVertVel, MaxYawRate, MaxRelHorizDist, TolR, TolYaw, wayPoints);
-    glbPoseSub = nh.subscribe(poseTopic, 1, &OnboardPlanner::callbackGlbPose, this);
+    */
+    wayPointsTracker = WayPointsTracker(VelocityControl, LoopMode, MaxHorizVel, MaxVertVel, MaxYawRate, MaxRelHorizDist, TolR, TolYaw);
+    glbPoseSub = nh.subscribe("/Robot_1/pose", 3, &OnboardPlanner::callbackGlbPose, this);
+    tarPoseSub = nh.subscribe("/Robot_2/pose", 3, &OnboardPlanner::callbackTarPose, this);
     ctrlPub = nh.advertise<sensor_msgs::Joy>("/dji_sdk/flight_control_setpoint_generic", 1);
     sdk_ctrl_authority_service = n.serviceClient<dji_sdk::SDKControlAuthority>("/dji_sdk/sdk_control_authority");
     drone_task_service = n.serviceClient<dji_sdk::DroneTaskControl>("/dji_sdk/drone_task_control");
@@ -207,6 +234,23 @@ void OnboardPlanner::initUAV_VIO()
     }
     initialize_process_done = true;
     return;
+}
+
+void OnboardPlanner::callbackTarPose(const geometry_msgs::PoseStamped::ConstPtr &msg)
+{
+
+    wayPointsTracker.targetWayPoint.x = msg->pose.position.y - 0.5;
+    wayPointsTracker.targetWayPoint.y = -msg->pose.position.x;
+    wayPointsTracker.targetWayPoint.z = msg->pose.position.z + 0.7;
+    wayPointsTracker.targetWayPoint.yaw = 0; //cvtQuat2Yaw(msg->pose.orientation.w,
+                                             //            msg->pose.orientation.x,
+                                             //            msg->pose.orientation.y,
+                                             //            msg->pose.orientation.z);
+    wayPointsTracker.targetWayPoint.x -= initialWayPoint.x;
+    wayPointsTracker.targetWayPoint.y -= initialWayPoint.y;
+    wayPointsTracker.targetWayPoint.z -= initialWayPoint.z;
+    //wayPointsTracker.targetWayPoint.yaw -= initialWayPoint.yaw;
+    wayPointsTracker.targetWayPoint.duration -= initialWayPoint.duration;
 }
 
 void OnboardPlanner::callbackGlbPose(const geometry_msgs::PoseStamped::ConstPtr &msg)
@@ -252,7 +296,7 @@ void OnboardPlanner::callbackGlbPose(const geometry_msgs::PoseStamped::ConstPtr 
             control.axes.push_back(curControl.uz);
             control.axes.push_back(curControl.uyaw);
             control.axes.push_back(flag);
-            ctrlPub.publish(control);   
+            ctrlPub.publish(control);
         }
         else
         {

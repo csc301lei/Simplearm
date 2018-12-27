@@ -1,0 +1,6 @@
+#ifndef KCFCOMMUNICATION_H_
+#define KCFCOMMUNICATION_H_
+
+
+
+#endif 
